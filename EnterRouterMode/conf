@@ -1,0 +1,12 @@
+##
+# Configs
+##
+
+# Reset root password to that of 'admin'?
+ROOT_PASS_RESET="YES"
+
+# Allow logins as root?
+ROOT_LOGIN="YES"
+
+# Turn on telnet access?
+TELNET="YES"

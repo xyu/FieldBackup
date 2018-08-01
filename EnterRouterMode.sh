@@ -2,19 +2,6 @@
 set -eu pipefail
 
 ##
-# Configs
-##
-
-# Reset root password to that of 'admin'?
-ROOT_PASS_RESET="YES"
-
-# Allow logins as root?
-ROOT_LOGIN="YES"
-
-# Turn on telnet access?
-TELNET="YES"
-
-##
 # Constants - Don't touch
 ##
 
@@ -36,20 +23,7 @@ run()
 	fi
 
 	echo "Executing '$MNT_USB/EnterRouterMode/$1'"
-	env -i \
-		ROOT_PASS_RESET=$ROOT_PASS_RESET \
-		ROOT_LOGIN=$ROOT_LOGIN \
-		TELNET=$TELNET \
-		MNT_SD=$MNT_SD \
-		MNT_USB=$MNT_USB \
-		PIDFILE=$PIDFILE \
-		CHECKSUM=$CHECKSUM \
-		/bin/sh "$MNT_USB/EnterRouterMode/$1"
-
-	if [ "$?" -ne "0" ]; then
-		echo "Error executing '$MNT_USB/EnterRouterMode/$1'"
-		exit 1
-	fi
+	. "$MNT_USB/EnterRouterMode/$1"
 }
 
 cleanup()
@@ -101,6 +75,9 @@ done
 
 # Write out pidfile only if one does not exist (eek race conditions!)
 [ ! -f "$PIDFILE" ] && echo "$$" > "$PIDFILE"
+
+# Load configs
+run config
 
 # TODO: Start flashing lights
 

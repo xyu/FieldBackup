@@ -1,5 +1,4 @@
 #!/bin/sh
-set -eu pipefail
 
 ##
 # Helper Functions

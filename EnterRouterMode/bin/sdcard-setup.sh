@@ -1,14 +1,13 @@
 #!/bin/sh
-set -eu pipefail
 
 # Skip setup if no SD card
 if [ ! -d "$MNT_SD" ]; then
-	exit 0
+	return 0
 fi
 
 # Skip setup if SD card already has a config file
 if [ -f "$MNT_SD/FieldBackup.conf" ]; then
-	exit 0
+	return 0
 fi
 
 # TODO: Skip config if SD card is locked
