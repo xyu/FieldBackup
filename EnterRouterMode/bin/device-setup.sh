@@ -35,15 +35,11 @@ make_exe()
 ##
 
 # Maybe skip device setup
-CHECKSUM_NEW=$( md5sum "$MNT_USB/EnterRouterMode.sh" )
-if [ -f "$CHECKSUM" ]; then
-	CHECKSUM_OLD=$( cat "$CHECKSUM" )
-else
-	CHECKSUM_OLD="N/A"
+if [ ! -f "$CHECKSUM" ]; then
+	echo "00000000000000000000000000000000  $MNT_USB/EnterRouterMode/conf" > "$CHECKSUM"
 fi
-if [ "$CHECKSUM_OLD" = "$CHECKSUM_NEW" ]; then
-	echo "Skipping device setup, no config changes"
-	exit 0
+if md5sum -c "$CHECKSUM"; then
+	return 0
 fi
 
 # Reset root password to that of 'admin'?
@@ -190,7 +186,7 @@ add_mod "/etc/rc.local" "$(
 )"
 
 # Write out flag to skip device setup
-md5sum "$MNT_USB/EnterRouterMode.sh" > "$CHECKSUM"
+md5sum "$MNT_USB/EnterRouterMode/conf" > "$CHECKSUM"
 
 # Commit configuration changes to NVRAM
 # sync
