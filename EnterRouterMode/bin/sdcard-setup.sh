@@ -6,14 +6,14 @@ if [ ! -d "$MNT_SD" ]; then
 fi
 
 # Skip setup if SD card already has a config file
-if [ -f "$MNT_SD/FieldBackup.conf" ]; then
+if [ -f "$CONFIGFILE" ]; then
 	return 0
 fi
 
 # TODO: Skip config if SD card is locked
 
 # Write out a config for new SD card backup
-cat <<- EOF > "$MNT_SD/FieldBackup.conf"
+cat <<- EOF > "$CONFIGFILE"
 	# Name of dir to backup this card to
 	SD_NAME="$( cat /proc/sys/kernel/random/uuid )"
 

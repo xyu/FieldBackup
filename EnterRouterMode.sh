@@ -8,6 +8,7 @@ set -eu pipefail
 MNT_SD="/data/UsbDisk1/Volume1"
 MNT_USB="/data/UsbDisk2/Volume1"
 PIDFILE="/tmp/EnterRouterMode.pid"
+CONFIGFILE="$MNT_SD/FieldBackup.conf"
 
 ##
 # Helper functions
@@ -93,8 +94,10 @@ run bin/device-setup.sh
 run bin/sdcard-setup.sh
 
 # Do rsync, we need more memory so turn on swap for just this action
-run bin/device-swapon.sh
-# TODO: SD Card start sync
-run bin/device-swapoff.sh
+if [ -f "$CONFIGFILE" ]; then
+	run bin/device-swapon.sh
+	run bin/sdcard-mirror.sh
+	run bin/device-swapoff.sh
+fi
 
 # TODO: Stop flashing lights
