@@ -203,6 +203,8 @@ add_mod "/etc/rc.local" "$(
 	EOF
 )"
 
-# Commit configuration changes to NVRAM
-# sync
-# /usr/sbin/etc_tools p
+# Commit configuration changes to NVRAM and reboot
+echo "Committing changes to disk and restarting..."
+/usr/sbin/etc_tools p
+/sbin/shutdown r &
+exit 0
