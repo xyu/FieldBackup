@@ -7,11 +7,11 @@
 add_mod()
 {
 	# Make sure file and dir exists
-	mkdir -p `dirname "$1"`
+	mkdir -p `echo "$1" | sed "s|/$( basename $1 )\$||g"`
 	touch "$1"
 
 	# Clear any modifications that exist
-	sed -i '' '/#START_MOD/,/#END_MOD/d' "$1"
+	sed -i '/#START_MOD/,/#END_MOD/d' "$1"
 
 	# Append modifications to file
 	echo "##START_MOD##\n\n$2\n\n###END_MOD###" >> "$1"
@@ -20,7 +20,7 @@ add_mod()
 make_exe()
 {
 	# Make sure file and dir exists
-	mkdir -p `dirname "$1"`
+	mkdir -p `echo "$1" | sed "s|/$( basename $1 )\$||g"`
 	touch "$1"
 
 	# Append modifications to file
