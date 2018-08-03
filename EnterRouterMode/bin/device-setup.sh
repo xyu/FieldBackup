@@ -167,13 +167,15 @@ make_exe "/etc/init.d/swap_off" "$(
 	EOF
 )"
 
+# Stop swap and backup if disks go away
+echo "Adding configs for when SD or USB drive is removed"
 add_mod "/etc/udev/script/remove_usb_storage.sh" "$(
 	cat <<- EOF
 		# Kill the rsync process if the USB drive or SD card is removed
-		if [ -f $PIDFILE ]; then
-			kill $( cat $PIDFILE )
+		if [ -f "$PIDFILE" ]; then
+			kill $( cat "$PIDFILE" )
 			killall rsync
-			rm -f $PIDFILE
+			rm -f "$PIDFILE"
 		fi
 
 		# Turn off swap on external drive
@@ -182,6 +184,7 @@ add_mod "/etc/udev/script/remove_usb_storage.sh" "$(
 )"
 
 # Firewall configs
+echo "Adding firewall configs to startup script"
 add_mod "/etc/rc.local" "$(
 	cat <<- 'EOF'
 		iface="apcli0"
