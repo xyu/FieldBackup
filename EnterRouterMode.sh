@@ -8,7 +8,6 @@ set -eu pipefail
 MNT_SD="/data/UsbDisk1/Volume1"
 MNT_USB="/data/UsbDisk2/Volume1"
 PIDFILE="/tmp/EnterRouterMode.pid"
-CHECKSUM="/etc/EnterRouterMode.checksum"
 
 ##
 # Helper functions

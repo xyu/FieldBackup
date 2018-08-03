@@ -31,16 +31,30 @@ make_exe()
 }
 
 ##
-# Payload
+# Setup device on config change
 ##
 
-# Maybe skip device setup
+# Write out a fake checksum if this is first time setup
+CHECKSUM="/etc/EnterRouterMode.checksum"
 if [ ! -f "$CHECKSUM" ]; then
 	echo "00000000000000000000000000000000  $MNT_USB/EnterRouterMode/conf" > "$CHECKSUM"
 fi
+
+# Skip device setup if it's setup with current config files
 if md5sum -c "$CHECKSUM"; then
 	return 0
 fi
+
+# Write out checksums to skip device setup next time
+md5sum \
+	"$MNT_USB/EnterRouterMode.sh" \
+	"$MNT_USB/EnterRouterMode/conf" \
+	"$MNT_USB/EnterRouterMode/bin/device-setup.sh" \
+	> "$CHECKSUM"
+
+##
+# Payload
+##
 
 # Reset root password to that of 'admin'?
 if [ "YES" = "$ROOT_PASS_RESET" ]; then
@@ -184,9 +198,6 @@ add_mod "/etc/rc.local" "$(
 		fi
 	EOF
 )"
-
-# Write out flag to skip device setup
-md5sum "$MNT_USB/EnterRouterMode/conf" > "$CHECKSUM"
 
 # Commit configuration changes to NVRAM
 # sync
