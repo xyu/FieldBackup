@@ -11,8 +11,32 @@ PIDFILE="/tmp/EnterRouterMode.pid"
 CONFIGFILE="$MNT_SD/FieldBackup.conf"
 
 ##
+# Vars / Flags
+##
+
+WINKING="FALSE"
+
+##
 # Helper functions
 ##
+
+led_wink()
+{
+	case "$1" in
+		"ON")
+			if [ "FALSE" = "$WINKING" ]; then
+				WINKING="TRUE"
+				/usr/sbin/pioctl status 2 || true
+			fi
+			;;
+		*)
+			if [ "TRUE" = "$WINKING" ]; then
+				WINKING="FALSE"
+				/usr/sbin/pioctl status 3 || true
+			fi
+			;;
+	esac
+}
 
 run()
 {
@@ -35,6 +59,9 @@ cleanup()
 	if [ $( cat "$PIDFILE" ) -eq "$$" ]; then
 		rm -f "$PIDFILE"
 	fi
+
+	# Stop flashing lights
+	led_wink "OFF"
 
 	if [ "$STATUS" -eq "0" ]; then
 		echo "EnterRouterMode.sh [$$] completed @ `date`"
@@ -78,10 +105,11 @@ done
 # Write out pidfile only if one does not exist (eek race conditions!)
 [ ! -f "$PIDFILE" ] && echo "$$" > "$PIDFILE"
 
+# Start flashing lights
+led_wink "ON"
+
 # Load configs
 run conf
-
-# TODO: Start flashing lights
 
 # Check battery power, don't try to write data if power's low
 if [ `cat /proc/vs_battery_quantity` -lt "20" ]; then
@@ -99,5 +127,3 @@ if [ -f "$CONFIGFILE" ]; then
 	run bin/sdcard-mirror.sh
 	run bin/device-swapoff.sh
 fi
-
-# TODO: Stop flashing lights
