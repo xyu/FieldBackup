@@ -76,7 +76,7 @@ done
 [ ! -f "$PIDFILE" ] && echo "$$" > "$PIDFILE"
 
 # Load configs
-run config
+run conf
 
 # TODO: Start flashing lights
 
