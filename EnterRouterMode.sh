@@ -27,17 +27,19 @@ run()
 
 cleanup()
 {
+	# Capture last exit status
+	local STATUS="$?"
+
 	# Remove pidfile if it's ours
 	if [ $( cat "$PIDFILE" ) -eq "$$" ]; then
 		rm -f "$PIDFILE"
 	fi
 
-	if [ "$?" -eq "0" ]; then
+	if [ "$STATUS" -eq "0" ]; then
 		echo "EnterRouterMode.sh [$$] completed @ `date`"
-		return 0
+	else
+		echo "EnterRouterMode.sh [$$] failed @ `date`"
 	fi
-
-	echo "EnterRouterMode.sh [$$] failed @ `date`"
 }
 
 ##
