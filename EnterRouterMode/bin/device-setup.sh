@@ -87,11 +87,12 @@ else
 fi
 
 # Turn on swap when USB drive is plugged in
+echo "Writing out configs for using a swapfile on USB drive"
 SWAP_FILE="$MNT_USB/EnterRouterMode/var/swapfile"
 SWAP_LOCK="$MNT_USB/EnterRouterMode/var/swapfile.lock"
 SWAP_LOG="$MNT_USB/EnterRouterMode/var/swapfile.log"
 
-make_exe "/etc/init.d/swap" "$(
+make_exe "/etc/init.d/swap_on" "$(
 	cat <<- EOF
 		#!/bin/sh
 
@@ -109,7 +110,7 @@ make_exe "/etc/init.d/swap" "$(
 				echo "[\$(date)] Found swapfile '$SWAP_FILE'" >> "$SWAP_LOG"
 			else
 				echo "[\$(date)] Creating 128MB swapfile '$SWAP_FILE'" >> "$SWAP_LOG"
-				dd if=/dev/zero of="$SWAP_FILE" bs=1024 count=131072 >> "$SWAP_LOG" 2>&1
+				dd if=/dev/zero of="$SWAP_FILE" bs=1M count=128 >> "$SWAP_LOG" 2>&1
 				sync >> "$SWAP_LOG" 2>&1
 			fi
 

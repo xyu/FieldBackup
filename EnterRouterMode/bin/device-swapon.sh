@@ -1,3 +1,3 @@
 #!/bin/sh
 
-/etc/init.d/swap
+/etc/init.d/swap_on
