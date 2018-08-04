@@ -102,14 +102,20 @@ SWAP_LOG="$MNT_USB/EnterRouterMode/log/swapfile.log"
 
 touch "$SWAP_LOG"
 
-make_exe "/etc/init.d/swap_on" "$(
+make_exe "/etc/init.d/swap_to_usb_storage" "$(
 	cat <<- EOF
 		#!/bin/sh
 
-		if [ -d "$MNT_USB/EnterRouterMode" ]; then
+		start()
+		{
+			# Can't start if no attached drive
+			if [ ! -d "$MNT_USB/EnterRouterMode" ]; then
+				return 1
+			fi
+
 			if [ -f "$SWAP_LOCK" ]; then
 				echo "[\$(date)] swap.lock exists abort swap creation" >> "$SWAP_LOG"
-				exit 0
+				return 1
 			else
 				touch "$SWAP_LOCK"
 				echo "[\$(date)] swap.lock created" >> "$SWAP_LOG"
@@ -133,7 +139,7 @@ make_exe "/etc/init.d/swap_on" "$(
 				if [ \$SWPATH = "$SWAP_FILE" ]; then
 					echo "[\$(date)] Swap already using '$SWAP_FILE'" >> "$SWAP_LOG"
 					rm -f "$SWAP_LOCK"
-					exit 0
+					return 0
 				fi
 			done < /proc/swaps
 
@@ -142,38 +148,50 @@ make_exe "/etc/init.d/swap_on" "$(
 
 			echo "[\$(date)] Turning on swapfile" >> "$SWAP_LOG"
 			/sbin/swapon "$SWAP_FILE" >> "$SWAP_LOG" 2>&1
-		fi
 
-		rm -f "$SWAP_LOCK"
-		exit 0
-	EOF
-)"
+			rm -f "$SWAP_LOCK"
+			return 0
+		}
 
-make_exe "/etc/init.d/swap_off" "$(
-	cat <<- EOF
-		#!/bin/sh
-
-		# Log to USB disk or don't log
-		if [ -f "$SWAP_LOG" ]; then
-			SWAP_LOG="$SWAP_LOG"
-		else
-			SWAP_LOG="/dev/null"
-		fi
-
-		# Find swapfile and turn it off
-		while read SWPATH SWTYPE SWSIZE SWUSED SWPRI; do
-			if [ \$SWPATH = "Filename" ]; then
-				continue
+		stop()
+		{
+			# Log to USB disk or don't log
+			if [ -f "$SWAP_LOG" ]; then
+				SWAP_LOG="$SWAP_LOG"
+			else
+				SWAP_LOG="/dev/null"
 			fi
 
-			if [ \$SWPATH = "$SWAP_FILE" ]; then
-				echo "[\$(date)] Turning off '$SWAP_FILE'" >> "\$SWAP_LOG"
-				/sbin/swapoff "$SWAP_FILE" >> "\$SWAP_LOG" 2>&1
-				exit 0
-			fi
-		done < /proc/swaps
+			# Find swapfile and turn it off
+			while read SWPATH SWTYPE SWSIZE SWUSED SWPRI; do
+				if [ \$SWPATH = "Filename" ]; then
+					continue
+				fi
 
-		exit 0
+				if [ \$SWPATH = "$SWAP_FILE" ]; then
+					echo "[\$(date)] Turning off '$SWAP_FILE'" >> "\$SWAP_LOG"
+					/sbin/swapoff "$SWAP_FILE" >> "\$SWAP_LOG" 2>&1
+					return 0
+				fi
+			done < /proc/swaps
+
+			return 0
+		}
+
+		case "\$1" in
+			"start")
+				start
+				;;
+			"stop")
+				stop
+				;;
+			*)
+				echo "Usage: \$0 {start|stop}"
+				exit 1
+			;;
+		esac
+
+		exit $?
 	EOF
 )"
 
@@ -188,8 +206,10 @@ add_mod "/etc/udev/script/remove_usb_storage.sh" "$(
 			rm -f "$PIDFILE"
 		fi
 
-		# Turn off swap on external drive
-		/etc/init.d/swap_off
+		# Turn off swap on external drive, eat errors
+		if [ -f "/etc/init.d/swap_to_usb_storage" ]; then
+			/etc/init.d/swap_to_usb_storage stop || true
+		fi
 	EOF
 )"
 
