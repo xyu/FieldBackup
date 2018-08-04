@@ -39,3 +39,14 @@ fi
 	"$SYNC_TARGET"
 
 sync
+
+echo "Ejecting SD card"
+while read DEVICE MOUNTPOINT FSTYPE RWROINFO; do
+  if [ "$MOUNTPOINT" != "$MNT_SD" ]; then
+    continue
+  fi
+
+  umount "$MOUNTPOINT" || umount2 "$MOUNTPOINT" || true
+done < /proc/mounts
+
+return 0
