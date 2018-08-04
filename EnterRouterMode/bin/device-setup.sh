@@ -196,7 +196,7 @@ make_exe "/etc/init.d/swap_to_usb_storage" "$(
 			;;
 		esac
 
-		exit $?
+		exit \$?
 	EOF
 )"
 
@@ -240,7 +240,7 @@ make_exe "/etc/init.d/firewall" "$(
 
 			/bin/iptables -P INPUT DROP
 			/bin/iptables -P OUTPUT DROP
-			/bin/iptables -P FORARD DROP
+			/bin/iptables -P FORWARD DROP
 
 			#
 			# Allow everything on loopback
