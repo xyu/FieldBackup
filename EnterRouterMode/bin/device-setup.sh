@@ -215,21 +215,69 @@ add_mod "/etc/udev/script/remove_usb_storage.sh" "$(
 
 # Firewall configs
 echo "Adding firewall configs to startup script"
-add_mod "/etc/rc.local" "$(
+
+make_exe "/etc/init.d/firewall" "$(
 	cat <<- 'EOF'
+		#!/bin/sh
 		iface="apcli0"
 
-		# Drop all tcp/udp traffic incomming on iface
-		/bin/iptables -A INPUT -p tcp -i ${iface} -j DROP
-		/bin/iptables -A INPUT -p udp -i ${iface} -j DROP
 
-		# Fetch IPv6 address on iface
-		ipv6_addr=`ifconfig ${iface} | grep inet6 | awk {'print $3'}`
 
-		# No IPv6 filter is installed, so remove IPv6 address on iface
-		if [ "${ipv6_addr}" != "" ]; then
-			/bin/ip -6 addr del "${ipv6_addr}" dev ${iface}
-		fi
+		start()
+		{
+			# Drop all tcp/udp traffic incomming on iface
+			/bin/iptables -A INPUT -p tcp -i ${iface} -j DROP
+			/bin/iptables -A INPUT -p udp -i ${iface} -j DROP
+
+			# Fetch IPv6 address on iface
+			ipv6_addr=`ifconfig ${iface} | grep inet6 | awk {'print $3'}`
+
+			# No IPv6 filter is installed, so remove IPv6 address on iface
+			if [ "${ipv6_addr}" != "" ]; then
+				/bin/ip -6 addr del "${ipv6_addr}" dev "${iface}"
+			fi
+
+			return 0
+		}
+
+		stop()
+		{
+			# Flush all existing rules
+			/bin/iptables -F
+
+			return 0
+		}
+
+		case "\$1" in
+			"start")
+				start
+				;;
+			"stop")
+				stop
+				;;
+			"restart")
+				stop
+				start
+				;;
+			*)
+				echo "Usage: \$0 {start|stop|restart}"
+				exit 1
+			;;
+		esac
+
+		exit $?
+	EOF
+)"
+
+add_mod "/etc/rc.local" "$(
+	cat <<- 'EOF'
+		/etc/init.d/firewall start
+	EOF
+)"
+
+add_mod "/etc/init.d/control.sh" "$(
+	cat <<- 'EOF'
+		/etc/init.d/firewall restart
 	EOF
 )"
 
