@@ -49,6 +49,7 @@ if [ ! -f "$CHECKSUM" ]; then
 fi
 
 # Skip device setup if it's setup with current config files
+echo "Checking for config file changes"
 if md5sum -c "$CHECKSUM"; then
 	return 0
 fi
