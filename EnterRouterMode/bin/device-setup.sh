@@ -231,8 +231,6 @@ make_exe "/etc/init.d/firewall" "$(
 			#
 
 			. /sbin/global.sh
-			getWanIfName
-			getLanIfName
 
 			#
 			# Default to drop everything
