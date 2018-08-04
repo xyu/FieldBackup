@@ -10,7 +10,10 @@ if [ -f "$CONFIGFILE" ]; then
 	return 0
 fi
 
-# TODO: Skip config if SD card is locked
+# Skip setup if SD card is locked
+if sd_is_readonly; then
+	return 0
+fi
 
 # Write out a config for new SD card backup
 cat <<- EOF > "$CONFIGFILE"

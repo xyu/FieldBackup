@@ -38,6 +38,24 @@ led_wink()
 	esac
 }
 
+sd_is_readonly()
+{
+	while read DEVICE MOUNTPOINT FSTYPE RWROINFO; do
+		if [ "$MOUNTPOINT" != "$MNT_SD" ]; then
+			continue
+		fi
+
+		if [ "ro" = "${RWROINFO:0:2}" ]; then
+			return 0
+		else
+			return 1
+		fi
+	done < /proc/mounts
+
+	# Pretend we're readonly if mount does not exist
+	return 0
+}
+
 run()
 {
 	# Make sure the file exists
