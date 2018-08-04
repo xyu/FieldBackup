@@ -13,8 +13,8 @@ add_mod()
 	# Clear any modifications that exist
 	sed -i '/##START_MOD##/,/###END_MOD###/d' "$1"
 
-	# Add modifications to head of file
-	cat <<- EOF | sed -i -e '/^#!\s*\/bin/r /dev/stdin' "$1"
+	# Write out temp file of modifications with header and footers
+	cat <<- EOF > "$1.modtemp"
 		##START_MOD##
 		#############
 
@@ -23,6 +23,10 @@ add_mod()
 		#############
 		###END_MOD###
 	EOF
+
+	# Add modifications to head of file
+	sed -i "/^#! *\/bin/r $1.modtemp" "$1"
+	rm "$1.modtemp"
 }
 
 make_exe()
