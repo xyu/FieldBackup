@@ -90,7 +90,9 @@ fi
 echo "Writing out configs for using a swapfile on USB drive"
 SWAP_FILE="$MNT_USB/EnterRouterMode/var/swapfile"
 SWAP_LOCK="$MNT_USB/EnterRouterMode/var/swapfile.lock"
-SWAP_LOG="$MNT_USB/EnterRouterMode/var/swapfile.log"
+SWAP_LOG="$MNT_USB/EnterRouterMode/log/swapfile.log"
+
+touch "$SWAP_LOG"
 
 make_exe "/etc/init.d/swap_on" "$(
 	cat <<- EOF

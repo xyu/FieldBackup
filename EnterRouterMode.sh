@@ -76,9 +76,10 @@ cleanup()
 
 # Create runtime dirs
 mkdir -p "$MNT_USB/EnterRouterMode/var"
+mkdir -p "$MNT_USB/EnterRouterMode/log"
 
 # Set all output to logfile
-exec 1>> "$MNT_USB/EnterRouterMode/var/EnterRouterMode.log" 2>&1
+exec 1>> "$MNT_USB/EnterRouterMode/log/EnterRouterMode.log" 2>&1
 
 # Trap errors
 trap cleanup 0 1 2 3 9 15
