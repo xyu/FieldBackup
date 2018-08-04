@@ -2,7 +2,18 @@
 set -eu pipefail
 
 ##
-# Constants - Don't touch
+# Field Backup with RAVPower FileHub Plus
+# https://github.com/xyu/FieldBackup
+#
+# A set of scripts that will automatically backup SD cards inserted into the
+# RAVPower FileHub Plus (RP-WD03) onto the attached USB drive.
+#
+# Do not touch this file configure device setup options with:
+# ./EnterRouterMode/conf
+##
+
+##
+# Constants
 ##
 
 MNT_SD="/data/UsbDisk1/Volume1"

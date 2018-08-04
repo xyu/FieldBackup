@@ -17,6 +17,11 @@ fi
 
 # Write out a config for new SD card backup
 cat <<- EOF > "$CONFIGFILE"
+	##
+	# Field Backup with RAVPower FileHub Plus
+	# https://github.com/xyu/FieldBackup
+	##
+
 	# Name of dir to backup this card to
 	SD_NAME="$( cat /proc/sys/kernel/random/uuid )"
 
