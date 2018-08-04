@@ -37,7 +37,7 @@ make_exe()
 # Write out a fake checksum if this is first time setup
 CHECKSUM="/etc/EnterRouterMode.checksum"
 if [ ! -f "$CHECKSUM" ]; then
-	echo "00000000000000000000000000000000  $MNT_USB/EnterRouterMode/conf" > "$CHECKSUM"
+	echo "00000000000000000000000000000000  $MNT_USB/EnterRouterMode.sh" > "$CHECKSUM"
 fi
 
 # Skip device setup if it's setup with current config files
