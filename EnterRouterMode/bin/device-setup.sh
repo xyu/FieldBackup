@@ -215,26 +215,97 @@ add_mod "/etc/udev/script/remove_usb_storage.sh" "$(
 
 # Firewall configs
 echo "Adding firewall configs to startup script"
-
 make_exe "/etc/init.d/firewall" "$(
 	cat <<- 'EOF'
 		#!/bin/sh
-		iface="apcli0"
-
-
 
 		start()
 		{
-			# Drop all tcp/udp traffic incomming on iface
-			/bin/iptables -A INPUT -p tcp -i ${iface} -j DROP
-			/bin/iptables -A INPUT -p udp -i ${iface} -j DROP
+			#
+			# Load interface names
+			#
 
-			# Fetch IPv6 address on iface
-			ipv6_addr=`ifconfig ${iface} | grep inet6 | awk {'print $3'}`
+			. /sbin/global.sh
+			getWanIfName
+			getLanIfName
 
-			# No IPv6 filter is installed, so remove IPv6 address on iface
+			#
+			# Default to drop everything
+			#
+
+			/bin/iptables -P INPUT DROP
+			/bin/iptables -P OUTPUT DROP
+			/bin/iptables -P FORARD DROP
+
+			#
+			# Allow everything on loopback
+			#
+
+			/bin/iptables -A INPUT  -i "lo" -j ACCEPT
+			/bin/iptables -A OUTPUT -o "lo" -j ACCEPT
+
+			#
+			# Allow all LAN to LAN & WAN traffic
+			#
+
+			/bin/iptables -A FORWARD -i "$lan_if" -o "$lan_if" -j ACCEPT
+			/bin/iptables -A FORWARD -i "$lan_if" -o "$wan_if" -j ACCEPT
+			/bin/iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+			#
+			# Connections to WAN
+			#
+
+			# DNS queries
+			/bin/iptables -A OUTPUT -o "$wan_if" -p tcp --dport 53   -m state --state NEW,ESTABLISHED -j ACCEPT
+			/bin/iptables -A INPUT  -i "$wan_if" -p tcp --sport 53   -m state --state ESTABLISHED     -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 53   -m state --state NEW,ESTABLISHED -j ACCEPT
+			/bin/iptables -A INPUT  -i "$wan_if" -p udp --sport 53   -m state --state ESTABLISHED     -j ACCEPT
+
+			# Allow DNS queries on
+			/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 123  -m state --state NEW,ESTABLISHED -j ACCEPT
+			/bin/iptables -A INPUT  -i "$wan_if" -p udp --sport 123  -m state --state ESTABLISHED     -j ACCEPT
+
+			#
+			# Allow LAN to access router services
+			#
+
+			# Pings
+			/bin/iptables -A INPUT  -i "$lan_if" -p icmp --icmp-type echo-request -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$lan_if" -p icmp --icmp-type echo-reply   -j ACCEPT
+
+			# Telnet
+			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 23   -m state --state NEW,ESTABLISHED -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --sport 23   -m state --state ESTABLISHED     -j ACCEPT
+
+			# HTTP / WebDAV
+			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 80   -m state --state NEW,ESTABLISHED -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --sport 80   -m state --state ESTABLISHED     -j ACCEPT
+
+			# SMB
+			/bin/iptables -A INPUT  -i "$lan_if" -p udp --dport 137  -m state --state NEW,ESTABLISHED -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$lan_if" -p udp --sport 137  -m state --state ESTABLISHED     -j ACCEPT
+			/bin/iptables -A INPUT  -i "$lan_if" -p udp --dport 138  -m state --state NEW,ESTABLISHED -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$lan_if" -p udp --sport 138  -m state --state ESTABLISHED     -j ACCEPT
+			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 139  -m state --state NEW,ESTABLISHED -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --sport 139  -m state --state ESTABLISHED     -j ACCEPT
+			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 445  -m state --state NEW,ESTABLISHED -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --sport 445  -m state --state ESTABLISHED     -j ACCEPT
+
+			# DLNA
+			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 8200 -m state --state NEW,ESTABLISHED -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --sport 8200 -m state --state ESTABLISHED     -j ACCEPT
+
+			#
+			# Turn off IPv6 on WAN
+			#
+
+			# Fetch IPv6 address
+			local ipv6_addr=`ifconfig ${wan_if} | grep inet6 | awk {'print $3'}`
+
+			# No IPv6 filter is installed, so remove IPv6 address
 			if [ "${ipv6_addr}" != "" ]; then
-				/bin/ip -6 addr del "${ipv6_addr}" dev "${iface}"
+				/bin/ip -6 addr del "${ipv6_addr}" dev "${wan_if}"
 			fi
 
 			return 0
@@ -248,7 +319,7 @@ make_exe "/etc/init.d/firewall" "$(
 			return 0
 		}
 
-		case "\$1" in
+		case "$1" in
 			"start")
 				start
 				;;
@@ -260,7 +331,7 @@ make_exe "/etc/init.d/firewall" "$(
 				start
 				;;
 			*)
-				echo "Usage: \$0 {start|stop|restart}"
+				echo "Usage: $0 {start|stop|restart}"
 				exit 1
 			;;
 		esac
@@ -271,13 +342,19 @@ make_exe "/etc/init.d/firewall" "$(
 
 add_mod "/etc/rc.local" "$(
 	cat <<- 'EOF'
-		/etc/init.d/firewall start
+		# Turn on firewall, eat errors
+		if [ -f "/etc/init.d/firewall" ]; then
+			/etc/init.d/firewall start || true
+		fi
 	EOF
 )"
 
 add_mod "/etc/init.d/control.sh" "$(
 	cat <<- 'EOF'
-		/etc/init.d/firewall restart
+		# Restart firewall, eat errors
+		if [ -f "/etc/init.d/firewall" ]; then
+			/etc/init.d/firewall restart || true
+		fi
 	EOF
 )"
 
