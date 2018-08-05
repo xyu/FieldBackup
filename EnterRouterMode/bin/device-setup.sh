@@ -31,11 +31,8 @@ add_mod()
 
 make_exe()
 {
-	# Make sure file and dir exists
+	# Make sure dir exists and write file
 	mkdir -p `echo "$1" | sed "s|/$( basename $1 )\$||g"`
-	touch "$1"
-
-	# Append modifications to file
 	echo "$2" > "$1"
 
 	# Make file executable
@@ -265,7 +262,7 @@ make_exe "/etc/init.d/firewall" "$(
 			/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 53   -m state --state NEW,ESTABLISHED -j ACCEPT
 			/bin/iptables -A INPUT  -i "$wan_if" -p udp --sport 53   -m state --state ESTABLISHED     -j ACCEPT
 
-			# Allow DNS queries on
+			# NTP sync
 			/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 123  -m state --state NEW,ESTABLISHED -j ACCEPT
 			/bin/iptables -A INPUT  -i "$wan_if" -p udp --sport 123  -m state --state ESTABLISHED     -j ACCEPT
 

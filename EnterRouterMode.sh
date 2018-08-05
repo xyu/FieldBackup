@@ -72,7 +72,7 @@ run()
 	# Make sure the file exists
 	if [ ! -f "$MNT_USB/EnterRouterMode/$1" ]; then
 		echo "'$1' not found"
-		exit 1
+		return 1
 	fi
 
 	echo "Executing '$MNT_USB/EnterRouterMode/$1'"
@@ -122,8 +122,7 @@ echo "EnterRouterMode.sh [$$] started @ `date`"
 
 # Wait if another process is already running
 while [ -f "$PIDFILE" ]; do
-	PID=$( cat "$PIDFILE" )
-	if ps -o pid | grep "$PID" > /dev/null; then
+	if ps -o pid | grep $( cat "$PIDFILE" ) > /dev/null; then
 		# pidfile reference running process let's wait
 		sleep 30
 	else
