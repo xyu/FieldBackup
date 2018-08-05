@@ -299,18 +299,6 @@ make_exe "/etc/init.d/firewall" "$(
 			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 8200 -m state --state NEW,ESTABLISHED -j ACCEPT
 			/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --sport 8200 -m state --state ESTABLISHED     -j ACCEPT
 
-			#
-			# Turn off IPv6 on WAN
-			#
-
-			# Fetch IPv6 address
-			local ipv6_addr=`ifconfig ${wan_if} | grep inet6 | awk {'print $3'}`
-
-			# No IPv6 filter is installed, so remove IPv6 address
-			if [ "${ipv6_addr}" != "" ]; then
-				/bin/ip -6 addr del "${ipv6_addr}" dev "${wan_if}"
-			fi
-
 			return 0
 		}
 
@@ -318,6 +306,19 @@ make_exe "/etc/init.d/firewall" "$(
 		{
 			# Flush all existing rules
 			/bin/iptables -F
+
+			return 0
+		}
+
+		block_ipv6()
+		{
+			/bin/ip -6 -o addr show | while read IPIFID IPDEV IPTYPE IPADDR IPINFO; do
+				if [ "lo" = "$IPDEV" ]; then
+					continue
+				fi
+
+				/bin/ip -6 addr del "$IPADDR" dev "$IPDEV"
+			done
 
 			return 0
 		}
@@ -333,8 +334,11 @@ make_exe "/etc/init.d/firewall" "$(
 				stop
 				start
 				;;
+			"block_ipv6")
+				block_ipv6
+				;;
 			*)
-				echo "Usage: $0 {start|stop|restart}"
+				echo "Usage: $0 {start|stop|restart|block_ipv6}"
 				exit 1
 			;;
 		esac
@@ -344,19 +348,29 @@ make_exe "/etc/init.d/firewall" "$(
 )"
 
 add_mod "/etc/rc.local" "$(
-	cat <<- 'EOF'
+	cat <<- EOF
 		# Turn on firewall, eat errors
 		if [ -f "/etc/init.d/firewall" ]; then
 			/etc/init.d/firewall start || true
+
+			# Maybe kill IPv6 based on \$ALLOW_IPV6 setting
+			if [ "YES" != "$ALLOW_IPV6" ]; then
+				/etc/init.d/firewall block_ipv6 || true
+			fi
 		fi
 	EOF
 )"
 
 add_mod "/etc/init.d/control.sh" "$(
-	cat <<- 'EOF'
+	cat <<- EOF
 		# Restart firewall, eat errors
 		if [ -f "/etc/init.d/firewall" ]; then
 			/etc/init.d/firewall restart || true
+
+			# Maybe kill IPv6 based on \$ALLOW_IPV6 setting
+			if [ "YES" != "$ALLOW_IPV6" ]; then
+				/etc/init.d/firewall block_ipv6 || true
+			fi
 		fi
 	EOF
 )"

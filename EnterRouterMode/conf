@@ -10,3 +10,10 @@ ROOT_LOGIN="YES"
 
 # Turn on telnet access?
 TELNET="YES"
+
+# Turn on IPv6 support?
+# This router does not come with IPv6 firewalls (e.g. ip6tables) so the
+# only way to secure the device is to delete IPv6 addresses from all
+# interfaces.
+# Only turn this on if you really need it.
+ALLOW_IPV6="NO"
