@@ -1,19 +1,24 @@
 ##
 # Configs
+# Valid values for each setting is either "YES" or "NO"
 ##
 
 # Reset root password to that of 'admin'?
 ROOT_PASS_RESET="YES"
 
 # Allow logins as root?
+# Useful for debugging but makes the device less secure.
+# Set this to "YES" only if you really need it.
 ROOT_LOGIN="YES"
 
 # Turn on telnet access?
+# Useful for debugging but makes the device less secure.
+# Set this to "YES" only if you really need it.
 TELNET="YES"
 
 # Turn on IPv6 support?
 # This router does not come with IPv6 firewalls (e.g. ip6tables) so the
 # only way to secure the device is to delete IPv6 addresses from all
 # interfaces.
-# Only turn this on if you really need it.
+# Set this to "YES" only if you really need it.
 ALLOW_IPV6="NO"
