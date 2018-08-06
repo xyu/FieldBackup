@@ -230,6 +230,15 @@ make_exe "/etc/init.d/firewall" "$(
 		start()
 		{
 			#
+			# Check that we are starting with empty chains
+			#
+
+			if [ $( /bin/iptables -S | wc -l ) -gt 3 ]; then
+				echo "Chains for 'filter' table not empty. Use $0 restart to flush and add chains"
+				return 1
+			fi
+
+			#
 			# Load interface names
 			#
 
