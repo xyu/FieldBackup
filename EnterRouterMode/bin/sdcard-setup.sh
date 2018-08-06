@@ -12,7 +12,8 @@ fi
 
 # Skip setup if SD card is locked
 if sd_is_readonly; then
-	return 0
+	echo "SD card does not have config file and is readonly."
+	return 1
 fi
 
 # Write out a config for new SD card backup
