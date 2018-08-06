@@ -256,8 +256,8 @@ make_exe "/etc/init.d/firewall" "$(
 			# Allow everything on loopback
 			#
 
-			/bin/iptables -A INPUT  -i "lo" -j ACCEPT
-			/bin/iptables -A OUTPUT -o "lo" -j ACCEPT
+			/bin/iptables -A INPUT   -i "lo" -j ACCEPT
+			/bin/iptables -A OUTPUT  -o "lo" -j ACCEPT
 
 			#
 			# Allow all LAN to LAN & WAN traffic
@@ -265,6 +265,13 @@ make_exe "/etc/init.d/firewall" "$(
 
 			/bin/iptables -A FORWARD -i "$lan_if" -o "$lan_if" -j ACCEPT
 			/bin/iptables -A FORWARD -i "$lan_if" -o "$wan_if" -j ACCEPT
+
+			#
+			# Allow previously established connections
+			#
+
+			/bin/iptables -A INPUT   -m state --state RELATED,ESTABLISHED -j ACCEPT
+			/bin/iptables -A OUTPUT  -m state --state RELATED,ESTABLISHED -j ACCEPT
 			/bin/iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
 			#
@@ -276,14 +283,11 @@ make_exe "/etc/init.d/firewall" "$(
 			/bin/iptables -A INPUT  -i "$wan_if" -p udp --dport 68    -j ACCEPT
 
 			# DNS queries
-			/bin/iptables -A OUTPUT -o "$wan_if" -p tcp --dport 53   -m state --state NEW,ESTABLISHED -j ACCEPT
-			/bin/iptables -A INPUT  -i "$wan_if" -p tcp --sport 53   -m state --state ESTABLISHED     -j ACCEPT
-			/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 53   -m state --state NEW,ESTABLISHED -j ACCEPT
-			/bin/iptables -A INPUT  -i "$wan_if" -p udp --sport 53   -m state --state ESTABLISHED     -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$wan_if" -p tcp --dport 53    -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 53    -j ACCEPT
 
 			# NTP sync
-			/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 123  -m state --state NEW,ESTABLISHED -j ACCEPT
-			/bin/iptables -A INPUT  -i "$wan_if" -p udp --sport 123  -m state --state ESTABLISHED     -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 123   -j ACCEPT
 
 			#
 			# Allow LAN to access router services
@@ -298,26 +302,19 @@ make_exe "/etc/init.d/firewall" "$(
 			/bin/iptables -A OUTPUT -o "$lan_if" -p udp --sport 67   -j ACCEPT
 
 			# Telnet
-			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 23   -m state --state NEW,ESTABLISHED -j ACCEPT
-			/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --sport 23   -m state --state ESTABLISHED     -j ACCEPT
+			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 23   -j ACCEPT
 
 			# HTTP / WebDAV
-			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 80   -m state --state NEW,ESTABLISHED -j ACCEPT
-			/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --sport 80   -m state --state ESTABLISHED     -j ACCEPT
+			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 80   -j ACCEPT
 
 			# SMB
-			/bin/iptables -A INPUT  -i "$lan_if" -p udp --dport 137  -m state --state NEW,ESTABLISHED -j ACCEPT
-			/bin/iptables -A OUTPUT -o "$lan_if" -p udp --sport 137  -m state --state ESTABLISHED     -j ACCEPT
-			/bin/iptables -A INPUT  -i "$lan_if" -p udp --dport 138  -m state --state NEW,ESTABLISHED -j ACCEPT
-			/bin/iptables -A OUTPUT -o "$lan_if" -p udp --sport 138  -m state --state ESTABLISHED     -j ACCEPT
-			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 139  -m state --state NEW,ESTABLISHED -j ACCEPT
-			/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --sport 139  -m state --state ESTABLISHED     -j ACCEPT
-			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 445  -m state --state NEW,ESTABLISHED -j ACCEPT
-			/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --sport 445  -m state --state ESTABLISHED     -j ACCEPT
+			/bin/iptables -A INPUT  -i "$lan_if" -p udp --dport 137  -j ACCEPT
+			/bin/iptables -A INPUT  -i "$lan_if" -p udp --dport 138  -j ACCEPT
+			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 139  -j ACCEPT
+			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 445  -j ACCEPT
 
 			# DLNA
-			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 8200 -m state --state NEW,ESTABLISHED -j ACCEPT
-			/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --sport 8200 -m state --state ESTABLISHED     -j ACCEPT
+			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 8200 -j ACCEPT
 
 			return 0
 		}
