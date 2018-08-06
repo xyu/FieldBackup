@@ -114,16 +114,14 @@ make_exe "/etc/init.d/swap_to_usb_storage" "$(
 	cat <<- EOF
 		#!/bin/sh
 
-		# Log to USB disk or don't log
+		# Log all output to logfile on USB disk or just echo to stdout
 		if [ -f "$SWAP_LOG" ]; then
-			SWAP_LOG="$SWAP_LOG"
-		else
-			SWAP_LOG="/dev/null"
+			exec 1>> "$SWAP_LOG" 2>&1
 		fi
 
 		logmsg()
 		{
-			echo "[\$( date -u '+%F %T' )] \$@" >> "\$SWAP_LOG"
+			echo "[\$( date -u '+%F %T' )] \$@"
 		}
 
 		start()
@@ -160,15 +158,15 @@ make_exe "/etc/init.d/swap_to_usb_storage" "$(
 				logmsg "Found swapfile"
 			else
 				logmsg "Creating swapfile (128MB)"
-				dd if=/dev/zero of="$SWAP_FILE" bs=1M count=128 >> "\$SWAP_LOG" 2>&1
-				sync >> "\$SWAP_LOG" 2>&1
+				dd if=/dev/zero of="$SWAP_FILE" bs=1M count=128
+				sync
 			fi
 
 			logmsg "Initializing swapfile"
-			/sbin/mkswap "$SWAP_FILE" >> "\$SWAP_LOG" 2>&1
+			/sbin/mkswap "$SWAP_FILE"
 
 			logmsg "Turning on swapfile"
-			/sbin/swapon "$SWAP_FILE" >> "\$SWAP_LOG" 2>&1
+			/sbin/swapon "$SWAP_FILE"
 
 			rm -f "$SWAP_LOCK"
 			logmsg "swap.lock removed"
@@ -187,7 +185,7 @@ make_exe "/etc/init.d/swap_to_usb_storage" "$(
 				fi
 
 				logmsg "Turning off swapping to USB drive swapfile"
-				/sbin/swapoff "$SWAP_FILE" >> "\$SWAP_LOG" 2>&1
+				/sbin/swapoff "$SWAP_FILE"
 				return 0
 			done < /proc/swaps
 
