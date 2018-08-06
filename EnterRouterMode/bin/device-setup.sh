@@ -114,75 +114,84 @@ make_exe "/etc/init.d/swap_to_usb_storage" "$(
 	cat <<- EOF
 		#!/bin/sh
 
+		# Log to USB disk or don't log
+		if [ -f "$SWAP_LOG" ]; then
+			SWAP_LOG="$SWAP_LOG"
+		else
+			SWAP_LOG="/dev/null"
+		fi
+
+		logmsg()
+		{
+			echo "[\$( date -u '+%F %T' )] \$@" >> "\$SWAP_LOG"
+		}
+
 		start()
 		{
-			# Can't start if no attached drive
-			if [ ! -d "$MNT_USB/EnterRouterMode" ]; then
-				return 1
-			fi
+			logmsg "Trying to start swapping to '$SWAP_FILE'"
 
-			if [ -f "$SWAP_LOCK" ]; then
-				echo "[\$(date)] swap.lock exists abort swap creation" >> "$SWAP_LOG"
-				return 1
-			else
-				touch "$SWAP_LOCK"
-				echo "[\$(date)] swap.lock created" >> "$SWAP_LOG"
-			fi
-
-			# Check if swap file exists
-			if [ -e "$SWAP_FILE" ]; then
-				echo "[\$(date)] Found swapfile '$SWAP_FILE'" >> "$SWAP_LOG"
-			else
-				echo "[\$(date)] Creating 128MB swapfile '$SWAP_FILE'" >> "$SWAP_LOG"
-				dd if=/dev/zero of="$SWAP_FILE" bs=1M count=128 >> "$SWAP_LOG" 2>&1
-				sync >> "$SWAP_LOG" 2>&1
-			fi
-
-			# Check if swap file is used
+			# Check if swap file is already used
 			while read SWPATH SWTYPE SWSIZE SWUSED SWPRI; do
-				if [ \$SWPATH = "Filename" ]; then
+				if [ "$SWAP_FILE" != "\$SWPATH" ]; then
 					continue
 				fi
 
-				if [ \$SWPATH = "$SWAP_FILE" ]; then
-					echo "[\$(date)] Swap already using '$SWAP_FILE'" >> "$SWAP_LOG"
-					rm -f "$SWAP_LOCK"
-					return 0
-				fi
+				logmsg "Already swapping to USB drive swapfile"
+				return 0
 			done < /proc/swaps
 
-			echo "[\$(date)] Initializing swapfile '$SWAP_FILE'" >> "$SWAP_LOG"
-			/sbin/mkswap "$SWAP_FILE" >> "$SWAP_LOG" 2>&1
+			# Can't start if no attached drive
+			if [ ! -d "$MNT_USB/EnterRouterMode" ]; then
+				logmsg "Aborting; no drive attached"
+				return 1
+			fi
 
-			echo "[\$(date)] Turning on swapfile" >> "$SWAP_LOG"
-			/sbin/swapon "$SWAP_FILE" >> "$SWAP_LOG" 2>&1
+			# Check lock to ensure concurrency of 1
+			if [ -f "$SWAP_LOCK" ]; then
+				logmsg "Aborting; swap.lock exists"
+				return 1
+			fi
+
+			touch "$SWAP_LOCK"
+			logmsg "swap.lock created"
+
+			# Check if swap file exists
+			if [ -e "$SWAP_FILE" ]; then
+				logmsg "Found swapfile"
+			else
+				logmsg "Creating swapfile (128MB)"
+				dd if=/dev/zero of="$SWAP_FILE" bs=1M count=128 >> "\$SWAP_LOG" 2>&1
+				sync >> "\$SWAP_LOG" 2>&1
+			fi
+
+			logmsg "Initializing swapfile"
+			/sbin/mkswap "$SWAP_FILE" >> "\$SWAP_LOG" 2>&1
+
+			logmsg "Turning on swapfile"
+			/sbin/swapon "$SWAP_FILE" >> "\$SWAP_LOG" 2>&1
 
 			rm -f "$SWAP_LOCK"
+			logmsg "swap.lock removed"
+
 			return 0
 		}
 
 		stop()
 		{
-			# Log to USB disk or don't log
-			if [ -f "$SWAP_LOG" ]; then
-				SWAP_LOG="$SWAP_LOG"
-			else
-				SWAP_LOG="/dev/null"
-			fi
+			logmsg "Trying to stop swapping to '$SWAP_FILE'"
 
 			# Find swapfile and turn it off
 			while read SWPATH SWTYPE SWSIZE SWUSED SWPRI; do
-				if [ \$SWPATH = "Filename" ]; then
+				if [ "$SWAP_FILE" != "\$SWPATH" ]; then
 					continue
 				fi
 
-				if [ \$SWPATH = "$SWAP_FILE" ]; then
-					echo "[\$(date)] Turning off '$SWAP_FILE'" >> "\$SWAP_LOG"
-					/sbin/swapoff "$SWAP_FILE" >> "\$SWAP_LOG" 2>&1
-					return 0
-				fi
+				logmsg "Turning off swapping to USB drive swapfile"
+				/sbin/swapoff "$SWAP_FILE" >> "\$SWAP_LOG" 2>&1
+				return 0
 			done < /proc/swaps
 
+			logmsg "Was not swapping to USB drive swapfile"
 			return 0
 		}
 
