@@ -39,6 +39,12 @@ make_exe()
 	chmod +x "$1"
 }
 
+restart_delay()
+{
+	sleep "$1"
+	/sbin/shutdown r
+}
+
 ##
 # Setup device on config change
 ##
@@ -373,7 +379,10 @@ add_mod "/etc/init.d/control.sh" "$(
 )"
 
 # Commit configuration changes to NVRAM and reboot
-echo "Committing changes to disk and restarting..."
+echo "Committing changes to disk"
 /usr/sbin/etc_tools p
-/sbin/shutdown r &
+
+echo "Exiting EnterRouterMode and restarting in 5 seconds"
+restart_delay 5 &
+
 exit 0

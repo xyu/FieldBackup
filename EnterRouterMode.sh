@@ -83,20 +83,23 @@ cleanup()
 {
 	# Capture last exit status
 	local STATUS="$?"
+	if [ "$STATUS" -eq "0" ]; then
+		echo "EnterRouterMode.sh [$$] completed"
+	else
+		echo "EnterRouterMode.sh [$$] failed"
+	fi
 
 	# Remove pidfile if it's ours
 	if [ $( cat "$PIDFILE" ) -eq "$$" ]; then
 		rm -f "$PIDFILE"
 	fi
 
+	# Persist to disk and wait
+	sync
+	sleep 2
+
 	# Stop flashing lights
 	led_wink "OFF"
-
-	if [ "$STATUS" -eq "0" ]; then
-		echo "EnterRouterMode.sh [$$] completed @ `date`"
-	else
-		echo "EnterRouterMode.sh [$$] failed @ `date`"
-	fi
 }
 
 ##
