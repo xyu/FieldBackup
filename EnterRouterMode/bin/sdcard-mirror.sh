@@ -11,7 +11,7 @@ if [ "YES" = "$SD_REPLICA" ]; then
 
 	echo "Mirroring '$SD_NAME' on USB drive to SD card"
 
-	SYNC_LOG="$MNT_USB/EnterRouterMode/log/$SD_NAME.SDCardReplica.log"
+	SYNC_LOG="$MNT_USB/EnterRouterMode/log/SDCard.$SD_NAME.Replica.log"
 	SYNC_SOURCE="$MNT_USB/SDMirrors/$SD_NAME"
 	SYNC_TARGET="$MNT_SD"
 
@@ -19,7 +19,7 @@ if [ "YES" = "$SD_REPLICA" ]; then
 else
 	echo "Mirroring SD card '$SD_NAME' to USB drive"
 
-	SYNC_LOG="$MNT_USB/EnterRouterMode/log/$SD_NAME.SDCard.log"
+	SYNC_LOG="$MNT_USB/EnterRouterMode/log/SDCard.$SD_NAME.Primary.log"
 	SYNC_SOURCE="$MNT_SD"
 	SYNC_TARGET="$MNT_USB/SDMirrors/$SD_NAME"
 
