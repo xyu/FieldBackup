@@ -9,12 +9,12 @@ ROOT_PASS_RESET="YES"
 # Allow logins as root?
 # Useful for debugging but makes the device less secure.
 # Set this to "YES" only if you really need it.
-ROOT_LOGIN="YES"
+ROOT_LOGIN="NO"
 
 # Turn on telnet access?
 # Useful for debugging but makes the device less secure.
 # Set this to "YES" only if you really need it.
-TELNET="YES"
+TELNET="NO"
 
 # Turn on IPv6 support?
 # This router does not come with IPv6 firewalls (e.g. ip6tables) so the
