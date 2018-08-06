@@ -203,7 +203,7 @@ add_mod "/etc/udev/script/remove_usb_storage.sh" "$(
 	cat <<- EOF
 		# Kill the rsync process if the USB drive or SD card is removed
 		if [ -f "$PIDFILE" ]; then
-			kill $( cat "$PIDFILE" )
+			kill \$( cat "$PIDFILE" )
 			killall rsync
 			rm -f "$PIDFILE"
 		fi
