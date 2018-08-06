@@ -84,9 +84,9 @@ cleanup()
 	# Capture last exit status
 	local STATUS="$?"
 	if [ "$STATUS" -eq "0" ]; then
-		echo "EnterRouterMode.sh [$$] completed"
+		echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] completed"
 	else
-		echo "EnterRouterMode.sh [$$] failed"
+		echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] failed"
 	fi
 
 	# Remove pidfile if it's ours
@@ -117,7 +117,7 @@ exec 1>> "$MNT_USB/EnterRouterMode/log/EnterRouterMode.log" 2>&1
 trap cleanup 0 1 2 3 9 15
 
 # Print header to log file
-echo "EnterRouterMode.sh [$$] started @ `date`"
+echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] started"
 
 # Basic bootstrap checks
 [ -d "$MNT_USB/EnterRouterMode" ]
