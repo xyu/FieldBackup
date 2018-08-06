@@ -271,6 +271,10 @@ make_exe "/etc/init.d/firewall" "$(
 			# Connections to WAN
 			#
 
+			# DHCP (client)
+			/bin/iptables -A OUTPUT -o "$wan_if" -p udp --sport 68    -j ACCEPT
+			/bin/iptables -A INPUT  -i "$wan_if" -p udp --dport 68    -j ACCEPT
+
 			# DNS queries
 			/bin/iptables -A OUTPUT -o "$wan_if" -p tcp --dport 53   -m state --state NEW,ESTABLISHED -j ACCEPT
 			/bin/iptables -A INPUT  -i "$wan_if" -p tcp --sport 53   -m state --state ESTABLISHED     -j ACCEPT
@@ -288,6 +292,10 @@ make_exe "/etc/init.d/firewall" "$(
 			# Pings
 			/bin/iptables -A INPUT  -i "$lan_if" -p icmp --icmp-type echo-request -j ACCEPT
 			/bin/iptables -A OUTPUT -o "$lan_if" -p icmp --icmp-type echo-reply   -j ACCEPT
+
+			# DHCP (server)
+			/bin/iptables -A INPUT  -i "$lan_if" -p udp --dport 67   -j ACCEPT
+			/bin/iptables -A OUTPUT -o "$lan_if" -p udp --sport 67   -j ACCEPT
 
 			# Telnet
 			/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 23   -m state --state NEW,ESTABLISHED -j ACCEPT
