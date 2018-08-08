@@ -79,6 +79,35 @@ run()
 	. "$MNT_USB/EnterRouterMode/$1"
 }
 
+get_concurrency_lock()
+{
+	local COUNT="0"
+
+	while [ -f "$PIDFILE" ]; do
+		if ps -o pid,args | grep -E "^ *$( cat $PIDFILE ) .+EnterRouterMode.sh" > /dev/null; then
+			# pidfile reference running process let's wait
+			if [ "$COUNT" -lt "30" ]; then
+				# For the first minute check every 2 seconds
+				sleep 2
+			elif [ "$COUNT" -lt "40" ]; then
+				# For the next 5 minutes check every 30 seconds
+				sleep 30
+			else
+				# Still locked so kill current process
+				echo "Could not aquire lock after 6 minutes"
+				return 1
+			fi
+			COUNT=`expr $COUNT + 1`
+		else
+			# pidfile exists but process is not running EnterRouterMode so remove file
+			rm -f "$PIDFILE"
+		fi
+	done
+
+	# Write out pidfile only if one does not exist (eek race conditions!)
+	[ ! -f "$PIDFILE" ] && echo "$$" > "$PIDFILE"
+}
+
 cleanup()
 {
 	# Capture last exit status
@@ -123,22 +152,11 @@ echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] started"
 [ -d "$MNT_USB/EnterRouterMode" ]
 [ -f "$MNT_USB/EnterRouterMode.sh" ]
 
-# Wait if another process is already running
-while [ -f "$PIDFILE" ]; do
-	if ps -o pid | grep $( cat "$PIDFILE" ) > /dev/null; then
-		# pidfile reference running process let's wait
-		sleep 30
-	else
-		# pidfile exists but process is not running so remove file
-		rm -f "$PIDFILE"
-	fi
-done
-
-# Write out pidfile only if one does not exist (eek race conditions!)
-[ ! -f "$PIDFILE" ] && echo "$$" > "$PIDFILE"
-
 # Start flashing lights
 led_wink "ON"
+
+# Wait if another process is already running
+get_concurrency_lock
 
 # Load configs
 run conf
