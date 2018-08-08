@@ -270,8 +270,7 @@ make_exe "/etc/init.d/firewall" "$(
 			# Allow all LAN to LAN & WAN traffic
 			#
 
-			/bin/iptables -A FORWARD -i "$lan_if" -o "$lan_if" -j ACCEPT
-			/bin/iptables -A FORWARD -i "$lan_if" -o "$wan_if" -j ACCEPT
+			/bin/iptables -A FORWARD -i "$lan_if" -j ACCEPT
 
 			#
 			# Allow previously established connections
@@ -328,6 +327,11 @@ make_exe "/etc/init.d/firewall" "$(
 
 		stop()
 		{
+			# Accept all traffic by default
+			/bin/iptables -P INPUT ACCEPT
+			/bin/iptables -P OUTPUT ACCEPT
+			/bin/iptables -P FORWARD ACCEPT
+
 			# Flush all existing rules
 			/bin/iptables -F
 
