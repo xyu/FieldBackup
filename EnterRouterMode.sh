@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eu pipefail
+set -eu
 
 ##
 # Field Backup with RAVPower FileHub Plus
@@ -41,7 +41,7 @@ led_wink()
 				/usr/sbin/pioctl status 2 || true
 			fi
 			;;
-		*)
+		"OFF")
 			if [ "TRUE" = "$WINKING" ]; then
 				WINKING="FALSE"
 				/usr/sbin/pioctl status 3 || true
