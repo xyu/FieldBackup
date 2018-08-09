@@ -182,14 +182,14 @@ led_wink "ON"
 # Wait if another process is already running
 get_concurrency_lock
 
-# Load configs
-run conf
-
 # Check battery power, don't try to write data if power's low
 if [ `cat /proc/vs_battery_quantity` -lt "20" ]; then
 	echo "Battery at less then 20% full, bailing"
 	exit 1
 fi
+
+# Load configs
+run conf
 
 # Setup the RP-WD03 device and SD card if needed
 run bin/device-setup.sh
