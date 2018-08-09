@@ -26,6 +26,7 @@ CONFIGFILE="$MNT_SD/FieldBackup.conf"
 ##
 
 WINKING="FALSE"
+RESTART="FALSE"
 
 ##
 # Helper functions
@@ -112,15 +113,15 @@ cleanup()
 {
 	# Capture last exit status
 	local STATUS="$?"
+	local COUNT="0"
+
+	# Make sure we end execution if we get another signal again
+	trap "suicide" 0 1 2 3 9 15
+
 	if [ "$STATUS" -eq "0" ]; then
 		echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] completed"
 	else
 		echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] failed"
-	fi
-
-	# Remove pidfile if it's ours
-	if [ $( cat "$PIDFILE" ) -eq "$$" ]; then
-		rm -f "$PIDFILE"
 	fi
 
 	# Persist to disk and wait
@@ -129,6 +130,29 @@ cleanup()
 
 	# Stop flashing lights
 	led_wink "OFF"
+
+	# Trigger restart and wait to block other concurrent calls from starting
+	if [ "TRUE" = "$RESTART" ]; then
+		/sbin/shutdown r &
+
+		COUNT="0"
+		while [ "$COUNT" -lt "60" ]; do
+			sleep 1
+			COUNT=`expr $COUNT + 1`
+		done
+	fi
+
+	# Remove pidfile if it's ours
+	if [ -f "$PIDFILE" ]; then
+		if [ $( cat "$PIDFILE" ) -eq "$$" ]; then
+			rm -f "$PIDFILE"
+		fi
+	fi
+}
+
+suicide()
+{
+  exit $?
 }
 
 ##
@@ -143,7 +167,7 @@ mkdir -p "$MNT_USB/EnterRouterMode/log"
 exec 1>> "$MNT_USB/EnterRouterMode/log/EnterRouterMode.log" 2>&1
 
 # Trap errors
-trap cleanup 0 1 2 3 9 15
+trap "cleanup" 0 1 2 3 9 15
 
 # Print header to log file
 echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] started"

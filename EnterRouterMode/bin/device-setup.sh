@@ -39,12 +39,6 @@ make_exe()
 	chmod +x "$1"
 }
 
-restart_delay()
-{
-	sleep "$1"
-	/sbin/shutdown r
-}
-
 ##
 # Setup device on config change
 ##
@@ -407,7 +401,6 @@ add_mod "/etc/init.d/control.sh" "$(
 echo "Committing changes to disk"
 /usr/sbin/etc_tools p
 
-echo "Exiting EnterRouterMode and restarting in 5 seconds"
-restart_delay 5 &
-
+# Flag as restart needed and exit EnterRouterMode
+RESTART="TRUE"
 exit 0
