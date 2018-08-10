@@ -59,7 +59,7 @@ fi
 md5sum \
 	"$MNT_USB/EnterRouterMode.sh" \
 	"$MNT_USB/EnterRouterMode/conf" \
-	"$MNT_USB/EnterRouterMode/bin/device-setup.sh" \
+	"$MNT_USB/EnterRouterMode/bin/scripts/device-setup.sh" \
 	> "$CHECKSUM"
 
 ##

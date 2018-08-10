@@ -192,12 +192,12 @@ fi
 run conf
 
 # Setup the RP-WD03 device and SD card if needed
-run bin/device-setup.sh
-run bin/sdcard-setup.sh
+run bin/scripts/device-setup.sh
+run bin/scripts/sdcard-setup.sh
 
 # Do rsync, we need more memory so turn on swap for just this action
 if [ -f "$CONFIGFILE" ]; then
-	run bin/device-swapon.sh
-	run bin/sdcard-mirror.sh
-	run bin/device-swapoff.sh
+	run bin/scripts/device-swapon.sh
+	run bin/scripts/sdcard-mirror.sh
+	run bin/scripts/device-swapoff.sh
 fi
