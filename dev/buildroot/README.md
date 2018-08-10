@@ -131,7 +131,11 @@ General Public Licence for details.
 
 ## Optional Packages Included With Repo
 
-We also include a more up to date version of busybox to have access to more functions.
+These packages are not needed for the FieldBackup feature to work but are useful if you want to telnet into the device and do more advanced things. They are included as a convenience.
+
+### BusyBox
+
+A more up to date version of busybox which provides access to more functions, this is dynamically linked to system libs to reduce its memory footprint.
 
 ```
 $ file busybox
