@@ -210,6 +210,24 @@ ssh-keyscan: ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), stat
 sshd:        ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), statically linked, stripped
 ```
 
+### OpenVPN
+
+OpenVPN might be useful for setting up a VPN tunnel from the device itself.
+
+```
+$ file openvpn
+openvpn: ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), statically linked, stripped
+```
+
+```
+# ./openvpn --version
+OpenVPN 2.4.6 mipsel-buildroot-linux-uclibc [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [MH/PKTINFO] [AEAD] built on Aug 10 2018
+library versions: OpenSSL 1.0.2o  27 Mar 2018, LZO 2.10
+Originally developed by James Yonan
+Copyright (C) 2002-2018 OpenVPN Inc <sales@openvpn.net>
+Compile time defines: enable_async_push=no enable_comp_stub=no enable_crypto=yes enable_crypto_ofb_cfb=yes enable_debug=yes enable_def_auth=yes enable_dependency_tracking=no enable_dlopen=unknown enable_dlopen_self=unknown enable_dlopen_self_static=unknown enable_doc=no enable_docs=no enable_documentation=no enable_fast_install=needless enable_fragment=yes enable_gtk_doc=no enable_gtk_doc_html=noenable_iproute2=yes enable_ipv6=yes enable_libtool_lock=yes enable_lz4=yes enable_lzo=yes enable_management=yes enable_multihome=yes enable_nls=no enable_pam_dlopen=no enable_pedantic=no enable_pf=yes enable_pkcs11=no enable_plugin_auth_pam=no enable_plugin_down_root=no enable_plugins=no enable_port_share=yes enable_selinux=no enable_server=yes enable_shared=no enable_shared_with_static_runtimes=no enable_small=no enable_static=yes enable_strict=no enable_strict_options=no enable_systemd=no enable_werror=no enable_win32_dll=yes enable_x509_alt_username=no with_aix_soname=aix with_crypto_library=openssl with_fop=no with_gnu_ld=yes with_mem_check=no with_sysroot=no with_xmlto=no
+```
+
 ## Recompiling Packages
 
 Included is a Vagrant file from Buildroot:
