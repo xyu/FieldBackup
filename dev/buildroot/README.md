@@ -188,6 +188,24 @@ Currently defined functions:
         xargs, xxd, xz, xzcat, yes, zcat
 ```
 
+### SSH
+
+The full suite of SSH tools to securely send and receive files, all statically linked to not depend on system libraries.
+
+Note: If having an SSH daemon running on the device is useful to you it's probably better if you moved `sshd` to the device NVRAM.
+
+```
+$ file scp sftp ssh*
+scp:         ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), statically linked, stripped
+sftp:        ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), statically linked, stripped
+ssh:         ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), statically linked, stripped
+ssh-add:     ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), statically linked, stripped
+ssh-agent:   ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), statically linked, stripped
+ssh-keygen:  ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), statically linked, stripped
+ssh-keyscan: ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), statically linked, stripped
+sshd:        ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), statically linked, stripped
+```
+
 ## Recompiling Packages
 
 Included is a Vagrant file from Buildroot:
