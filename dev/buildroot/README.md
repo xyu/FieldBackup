@@ -29,6 +29,43 @@ VCED exceptions         : not available
 VCEI exceptions         : not available
 ```
 
+```
+# cat /proc/meminfo
+MemTotal:          27160 kB
+MemFree:            8136 kB
+Buffers:            1424 kB
+Cached:             6124 kB
+SwapCached:            0 kB
+Active:             4580 kB
+Inactive:           5364 kB
+Active(anon):       2396 kB
+Inactive(anon):        0 kB
+Active(file):       2184 kB
+Inactive(file):     5364 kB
+Unevictable:           0 kB
+Mlocked:               0 kB
+SwapTotal:             0 kB
+SwapFree:              0 kB
+Dirty:                 0 kB
+Writeback:             0 kB
+AnonPages:          2428 kB
+Mapped:             2172 kB
+Shmem:                 0 kB
+Slab:               5800 kB
+SReclaimable:        816 kB
+SUnreclaim:         4984 kB
+KernelStack:         464 kB
+PageTables:          296 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:       13580 kB
+Committed_AS:       6168 kB
+VmallocTotal:    1048372 kB
+VmallocUsed:        2776 kB
+VmallocChunk:    1042460 kB
+```
+
 Inspecting files we get:
 
 ```
@@ -68,9 +105,9 @@ Currently defined functions:
         watchdog, wc, which, xargs, zcat
 ```
 
-## Packages Included With Repo
+## Required Packages Included With Repo
 
-We use a statically linked `rsync` in this repo, stripped with gcc optimizations for speed rather then size because we're going to be loading this from an external disk rather then from device flash.
+We use a statically linked `rsync` in this repo, stripped with gcc optimizations for size. While space is not really an issue as we're going to be loading this from an external disk the device memory is small so we'll limit what needs to load.
 
 ```
 $ file rsync
@@ -91,6 +128,8 @@ rsync comes with ABSOLUTELY NO WARRANTY.  This is free software, and you
 are welcome to redistribute it under certain conditions.  See the GNU
 General Public Licence for details.
 ```
+
+## Optional Packages Included With Repo
 
 We also include a more up to date version of busybox to have access to more functions.
 
