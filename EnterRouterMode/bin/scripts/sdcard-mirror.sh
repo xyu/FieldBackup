@@ -1,5 +1,23 @@
 #!/bin/sh
 
+##
+# Helper Functions
+##
+
+eject_sd_card()
+{
+	local MOUNTPOINT=""
+
+	while read -r _ MOUNTPOINT _ ; do
+		if [ "$MOUNTPOINT" != "$MNT_SD" ]; then
+			continue
+		fi
+
+		umount "$MOUNTPOINT" || umount2 "$MOUNTPOINT" || true
+		return 0
+	done < /proc/mounts
+}
+
 # Load configs for mirroring
 . "$CONFIGFILE"
 
@@ -41,12 +59,6 @@ fi
 sync
 
 echo "Ejecting SD card"
-while read DEVICE MOUNTPOINT FSTYPE RWROINFO; do
-  if [ "$MOUNTPOINT" != "$MNT_SD" ]; then
-    continue
-  fi
-
-  umount "$MOUNTPOINT" || umount2 "$MOUNTPOINT" || true
-done < /proc/mounts
+eject_sd_card
 
 return 0
