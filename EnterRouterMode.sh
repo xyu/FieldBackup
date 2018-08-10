@@ -116,7 +116,7 @@ cleanup()
 	local COUNT="0"
 
 	# Make sure we end execution if we get another signal again
-	trap "suicide" 0 1 2 3 9 15
+	trap "suicide" 0 1 2 3 6 14 15
 
 	if [ "$STATUS" -eq "0" ]; then
 		echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] completed"
@@ -152,7 +152,7 @@ cleanup()
 
 suicide()
 {
-  exit $?
+	exit $?
 }
 
 ##
@@ -166,8 +166,9 @@ mkdir -p "$MNT_USB/EnterRouterMode/log"
 # Set all output to logfile
 exec 1>> "$MNT_USB/EnterRouterMode/log/EnterRouterMode.log" 2>&1
 
-# Trap errors
-trap "cleanup" 0 1 2 3 9 15
+# Trap exit and errors (SIGKILL can't be trapped)
+# SIGHUP SIGINT SIGQUIT SIGABRT SIGALRM SIGTERM
+trap "cleanup" 0 1 2 3 6 14 15
 
 # Print header to log file
 echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] started"
