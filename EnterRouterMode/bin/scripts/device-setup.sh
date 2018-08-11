@@ -409,5 +409,7 @@ echo "Committing changes to disk"
 /usr/sbin/etc_tools p
 
 # Flag as restart needed and exit EnterRouterMode
+
+# shellcheck disable=SC2034 # This is a flag used by the parent script sourcing this script
 RESTART="TRUE"
 exit 0
