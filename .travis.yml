@@ -4,3 +4,4 @@ sudo: false
 
 script:
   - bash -c 'shopt -s globstar; shellcheck --shell=ash **/*.sh'
+  - bash -c 'find EnterRouterMode/bin -type f -maxdepth 1 | xargs -I % bash -c "file % | grep \"32-bit LSB executable\" | grep MIPS"'
