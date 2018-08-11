@@ -2,6 +2,8 @@
 
 A set of scripts that will automatically backup SD cards inserted into the RAVPower FileHub Plus (RP-WD03) onto the attached USB drive. Backups are done incrementally with `rsync` and multiple cards may be backed up to the same USB backup drive in the field.
 
+[![Build Status](https://travis-ci.org/xyu/FieldBackup.svg?branch=master)](https://travis-ci.org/xyu/FieldBackup)
+
 ## Installation
 
 1. Copy the following files and dirs to the root of your USB backup drive:
