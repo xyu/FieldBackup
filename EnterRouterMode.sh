@@ -81,7 +81,8 @@ run()
 
 	echo "Executing '$MNT_USB/EnterRouterMode/$1'"
 
-	# shellcheck disable=SC1090 # Dynamic sourcing can't be followed by static analysis
+	# Dynamic sourcing can't be followed by static analysis
+	# shellcheck disable=SC1090
 	. "$MNT_USB/EnterRouterMode/$1"
 }
 
@@ -90,7 +91,8 @@ get_concurrency_lock()
 	local COUNT="0"
 
 	while [ -f "$PIDFILE" ]; do
-		# shellcheck disable=SC2009 # BusyBox on RP-WD03 does not have pgrep
+		# BusyBox on RP-WD03 does not have pgrep
+		# shellcheck disable=SC2009
 		if ps -o pid,args | grep -E "^ *$( cat "$PIDFILE" ) .+EnterRouterMode.sh" > /dev/null; then
 			# pidfile reference running process let's wait
 			if [ "$COUNT" -lt "30" ]; then

@@ -410,6 +410,7 @@ echo "Committing changes to disk"
 
 # Flag as restart needed and exit EnterRouterMode
 
-# shellcheck disable=SC2034 # This is a flag used by the parent script sourcing this script
+# This is a flag used by the parent script sourcing this script so ignore not used warning
+# shellcheck disable=SC2034
 RESTART="TRUE"
 exit 0

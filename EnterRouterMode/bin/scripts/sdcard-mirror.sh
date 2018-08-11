@@ -18,7 +18,9 @@ eject_sd_card()
 	done < /proc/mounts
 }
 
-# shellcheck disable=SC1090 # Load configs for mirroring from SD card
+# Load configs for mirroring from SD card
+# Ignore warning because it does not exist in this repo for shellcheck
+# shellcheck disable=SC1090
 . "$CONFIGFILE"
 
 if [ "YES" = "$SD_REPLICA" ]; then
