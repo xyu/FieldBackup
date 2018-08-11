@@ -52,7 +52,7 @@ fi
 	--stats \
 	--human-readable \
 	--log-file="$SYNC_LOG" \
-	--exclude="$( basename $CONFIGFILE )" \
+	--exclude="$( basename "$CONFIGFILE" )" \
 	"$SYNC_SOURCE/" \
 	"$SYNC_TARGET"
 

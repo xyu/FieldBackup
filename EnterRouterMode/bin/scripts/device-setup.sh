@@ -7,7 +7,7 @@
 add_mod()
 {
 	# Make sure file and dir exists
-	mkdir -p `echo "$1" | sed "s|/$( basename $1 )\$||g"`
+	mkdir -p "$( echo "$1" | sed "s|/$( basename "$1" )\$||g" )"
 	touch "$1"
 
 	# Clear any modifications that exist
@@ -25,14 +25,14 @@ add_mod()
 	EOF
 
 	# Add modifications to head of file
-	sed -i "/^#! *\/bin/r $1.modtemp" "$1"
+	sed -i "/^#! *\\/bin/r $1.modtemp" "$1"
 	rm "$1.modtemp"
 }
 
 make_exe()
 {
 	# Make sure dir exists and write file
-	mkdir -p `echo "$1" | sed "s|/$( basename $1 )\$||g"`
+	mkdir -p "$( echo "$1" | sed "s|/$( basename "$1" )\$||g" )"
 	echo "$2" > "$1"
 
 	# Make file executable
@@ -115,15 +115,17 @@ make_exe "/etc/init.d/swap_to_usb_storage" "$(
 
 		logmsg()
 		{
-			echo "[\$( date -u '+%F %T' )] \$@"
+			echo "[\$( date -u '+%F %T' )]" "\$@"
 		}
 
 		start()
 		{
+			local SWPATH=""
+
 			logmsg "Trying to start swapping to '$SWAP_FILE'"
 
 			# Check if swap file is already used
-			while read SWPATH SWTYPE SWSIZE SWUSED SWPRI; do
+			while read -r SWPATH _ ; do
 				if [ "$SWAP_FILE" != "\$SWPATH" ]; then
 					continue
 				fi
@@ -152,7 +154,7 @@ make_exe "/etc/init.d/swap_to_usb_storage" "$(
 				logmsg "Found swapfile"
 			else
 				logmsg "Creating swapfile (128MB)"
-				dd if=/dev/zero of="$SWAP_FILE" bs=1M count=128
+				dd if="/dev/zero" of="$SWAP_FILE" bs="1M" count="128"
 				sync
 			fi
 
@@ -170,10 +172,12 @@ make_exe "/etc/init.d/swap_to_usb_storage" "$(
 
 		stop()
 		{
+			local SWPATH=""
+
 			logmsg "Trying to stop swapping to '$SWAP_FILE'"
 
 			# Find swapfile and turn it off
-			while read SWPATH SWTYPE SWSIZE SWUSED SWPRI; do
+			while read -r SWPATH _ ; do
 				if [ "$SWAP_FILE" != "\$SWPATH" ]; then
 					continue
 				fi
@@ -210,7 +214,7 @@ add_mod "/etc/udev/script/remove_usb_storage.sh" "$(
 	cat <<- EOF
 		# Kill the rsync process if the USB drive or SD card is removed
 		if [ -f "$PIDFILE" ]; then
-			kill \$( cat "$PIDFILE" )
+			kill "\$( cat "$PIDFILE" )"
 			killall rsync
 			rm -f "$PIDFILE"
 		fi
@@ -234,7 +238,7 @@ make_exe "/etc/init.d/firewall" "$(
 			# Check that we are starting with empty chains
 			#
 
-			if [ $( /bin/iptables -S | wc -l ) -gt 3 ]; then
+			if [ "$( /bin/iptables -S | wc -l )" -gt 3 ]; then
 				echo "Chains for 'filter' table not empty. Use $0 restart to flush and add chains"
 				return 1
 			fi
@@ -334,7 +338,10 @@ make_exe "/etc/init.d/firewall" "$(
 
 		block_ipv6()
 		{
-			/bin/ip -6 -o addr show | while read IPIFID IPDEV IPTYPE IPADDR IPINFO; do
+			local IPDEV=""
+			local IPADDR=""
+
+			/bin/ip -6 -o addr show | while read -r _ IPDEV _ IPADDR _ ; do
 				if [ "lo" = "$IPDEV" ]; then
 					continue
 				fi

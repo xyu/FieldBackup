@@ -52,12 +52,15 @@ led_wink()
 
 sd_is_readonly()
 {
-	while read DEVICE MOUNTPOINT FSTYPE RWROINFO; do
+	local MOUNTPOINT=""
+	local RWROINFO=""
+
+	while read -r _ MOUNTPOINT _ RWROINFO ; do
 		if [ "$MOUNTPOINT" != "$MNT_SD" ]; then
 			continue
 		fi
 
-		if [ "ro" = "${RWROINFO:0:2}" ]; then
+		if [ "ro" = "$( echo "$RWROINFO" | cut -c 0-2 )" ]; then
 			return 0
 		else
 			return 1
@@ -85,7 +88,7 @@ get_concurrency_lock()
 	local COUNT="0"
 
 	while [ -f "$PIDFILE" ]; do
-		if ps -o pid,args | grep -E "^ *$( cat $PIDFILE ) .+EnterRouterMode.sh" > /dev/null; then
+		if ps -o pid,args | grep -E "^ *$( cat "$PIDFILE" ) .+EnterRouterMode.sh" > /dev/null; then
 			# pidfile reference running process let's wait
 			if [ "$COUNT" -lt "30" ]; then
 				# For the first minute check every 2 seconds
@@ -98,7 +101,7 @@ get_concurrency_lock()
 				echo "Could not aquire lock after 6 minutes"
 				return 1
 			fi
-			COUNT=`expr $COUNT + 1`
+			COUNT=$(( COUNT + 1 ))
 		else
 			# pidfile exists but process is not running EnterRouterMode so remove file
 			rm -f "$PIDFILE"
@@ -119,9 +122,9 @@ cleanup()
 	trap "suicide" 0 1 2 3 6 14 15
 
 	if [ "$STATUS" -eq "0" ]; then
-		echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] completed"
+		echo "EnterRouterMode.sh [$$][$( date -u '+%F %T' )] completed"
 	else
-		echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] failed"
+		echo "EnterRouterMode.sh [$$][$( date -u '+%F %T' )] failed"
 	fi
 
 	# Persist to disk and wait
@@ -138,13 +141,13 @@ cleanup()
 		COUNT="0"
 		while [ "$COUNT" -lt "60" ]; do
 			sleep 1
-			COUNT=`expr $COUNT + 1`
+			COUNT=$(( COUNT + 1 ))
 		done
 	fi
 
 	# Remove pidfile if it's ours
 	if [ -f "$PIDFILE" ]; then
-		if [ $( cat "$PIDFILE" ) -eq "$$" ]; then
+		if [ "$( cat "$PIDFILE" )" -eq "$$" ]; then
 			rm -f "$PIDFILE"
 		fi
 	fi
@@ -171,7 +174,7 @@ exec 1>> "$MNT_USB/EnterRouterMode/log/EnterRouterMode.log" 2>&1
 trap "cleanup" 0 1 2 3 6 14 15
 
 # Print header to log file
-echo "EnterRouterMode.sh [$$][`date -u '+%F %T'`] started"
+echo "EnterRouterMode.sh [$$][$( date -u '+%F %T' )] started"
 
 # Basic bootstrap checks
 [ -d "$MNT_USB/EnterRouterMode" ]
@@ -184,7 +187,7 @@ led_wink "ON"
 get_concurrency_lock
 
 # Check battery power, don't try to write data if power's low
-if [ `cat /proc/vs_battery_quantity` -lt "20" ]; then
+if [ "$( cat '/proc/vs_battery_quantity' )" -lt "20" ]; then
 	echo "Battery at less then 20% full, bailing"
 	exit 1
 fi
