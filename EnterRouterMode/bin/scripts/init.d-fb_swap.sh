@@ -1,4 +1,14 @@
 #!/bin/sh
+##START_MOD##
+#############
+
+MNT_USB=""
+SWAP_FILE=""
+SWAP_LOCK=""
+SWAP_LOG=""
+
+#############
+###END_MOD###
 
 ##
 # Field Backup with RAVPower FileHub Plus

@@ -105,10 +105,10 @@ echo "Writing out configs for using a swapfile on USB drive"
 install_init_script "fb_swap"
 add_mod "/etc/init.d/fb_swap" "$(
 	cat <<- EOF
-		\$MNT_USB="$MNT_USB"
-		\$SWAP_FILE="$MNT_USB/EnterRouterMode/var/swapfile"
-		\$SWAP_LOCK="$MNT_USB/EnterRouterMode/var/swapfile.lock"
-		\$SWAP_LOG="$MNT_USB/EnterRouterMode/log/swapfile.log"
+		MNT_USB="$MNT_USB"
+		SWAP_FILE="$MNT_USB/EnterRouterMode/var/swapfile"
+		SWAP_LOCK="$MNT_USB/EnterRouterMode/var/swapfile.lock"
+		SWAP_LOG="$MNT_USB/EnterRouterMode/log/swapfile.log"
 	EOF
 )"
 
