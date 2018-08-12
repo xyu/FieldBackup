@@ -161,12 +161,12 @@ add_mod "/etc/rc.local" "$(
 add_mod "/etc/init.d/control.sh" "$(
 	cat <<- EOF
 		# Restart firewall, eat errors
-		if [ -f "/etc/init.d/firewall" ]; then
-			/etc/init.d/firewall restart || true
+		if [ -f "/etc/init.d/fb_firewall" ]; then
+			/etc/init.d/fb_firewall restart || true
 
 			# Maybe kill IPv6 based on \$ALLOW_IPV6 setting
 			if [ "YES" != "$ALLOW_IPV6" ]; then
-				/etc/init.d/firewall block_ipv6 || true
+				/etc/init.d/fb_firewall block_ipv6 || true
 			fi
 		fi
 	EOF
