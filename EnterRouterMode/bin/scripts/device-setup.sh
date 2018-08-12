@@ -39,6 +39,20 @@ make_exe()
 	chmod +x "$1"
 }
 
+install_init_script()
+{
+	local TARGET="/etc/init.d/$1"
+
+	if [ -f "$TARGET" ]; then
+		rm "$TARGET"
+	fi
+
+	cp "$MNT_USB/EnterRouterMode/bin/scripts/init.d-$1.sh" "$TARGET"
+
+	# Fix file permissions
+	chmod 755 "$TARGET"
+}
+
 ##
 # Setup device on config change
 ##
@@ -98,113 +112,13 @@ fi
 
 # Turn on swap when USB drive is plugged in
 echo "Writing out configs for using a swapfile on USB drive"
-SWAP_FILE="$MNT_USB/EnterRouterMode/var/swapfile"
-SWAP_LOCK="$MNT_USB/EnterRouterMode/var/swapfile.lock"
-SWAP_LOG="$MNT_USB/EnterRouterMode/log/swapfile.log"
-
-touch "$SWAP_LOG"
-
-make_exe "/etc/init.d/swap_to_usb_storage" "$(
+install_init_script "fb_swap"
+add_mod "/etc/init.d/fb_swap" "$(
 	cat <<- EOF
-		#!/bin/sh
-
-		# Log all output to logfile on USB disk or just echo to stdout
-		if [ -f "$SWAP_LOG" ]; then
-			exec 1>> "$SWAP_LOG" 2>&1
-		fi
-
-		logmsg()
-		{
-			echo "[\$( date -u '+%F %T' )]" "\$@"
-		}
-
-		start()
-		{
-			local SWPATH=""
-
-			logmsg "Trying to start swapping to '$SWAP_FILE'"
-
-			# Check if swap file is already used
-			while read -r SWPATH _ ; do
-				if [ "$SWAP_FILE" != "\$SWPATH" ]; then
-					continue
-				fi
-
-				logmsg "Already swapping to USB drive swapfile"
-				return 0
-			done < /proc/swaps
-
-			# Can't start if no attached drive
-			if [ ! -d "$MNT_USB/EnterRouterMode" ]; then
-				logmsg "Aborting; no drive attached"
-				return 1
-			fi
-
-			# Check lock to ensure concurrency of 1
-			if [ -f "$SWAP_LOCK" ]; then
-				logmsg "Aborting; swap.lock exists"
-				return 1
-			fi
-
-			touch "$SWAP_LOCK"
-			logmsg "swap.lock created"
-
-			# Check if swap file exists
-			if [ -e "$SWAP_FILE" ]; then
-				logmsg "Found swapfile"
-			else
-				logmsg "Creating swapfile (128MB)"
-				dd if="/dev/zero" of="$SWAP_FILE" bs="1M" count="128"
-				sync
-			fi
-
-			logmsg "Initializing swapfile"
-			/sbin/mkswap "$SWAP_FILE"
-
-			logmsg "Turning on swapfile"
-			/sbin/swapon "$SWAP_FILE"
-
-			rm -f "$SWAP_LOCK"
-			logmsg "swap.lock removed"
-
-			return 0
-		}
-
-		stop()
-		{
-			local SWPATH=""
-
-			logmsg "Trying to stop swapping to '$SWAP_FILE'"
-
-			# Find swapfile and turn it off
-			while read -r SWPATH _ ; do
-				if [ "$SWAP_FILE" != "\$SWPATH" ]; then
-					continue
-				fi
-
-				logmsg "Turning off swapping to USB drive swapfile"
-				/sbin/swapoff "$SWAP_FILE"
-				return 0
-			done < /proc/swaps
-
-			logmsg "Was not swapping to USB drive swapfile"
-			return 0
-		}
-
-		case "\$1" in
-			"start")
-				start
-				;;
-			"stop")
-				stop
-				;;
-			*)
-				echo "Usage: \$0 {start|stop}"
-				exit 1
-			;;
-		esac
-
-		exit \$?
+		\$MNT_USB="$MNT_USB"
+		\$SWAP_FILE="$MNT_USB/EnterRouterMode/var/swapfile"
+		\$SWAP_LOCK="$MNT_USB/EnterRouterMode/var/swapfile.lock"
+		\$SWAP_LOG="$MNT_USB/EnterRouterMode/log/swapfile.log"
 	EOF
 )"
 
@@ -220,8 +134,8 @@ add_mod "/etc/udev/script/remove_usb_storage.sh" "$(
 		fi
 
 		# Turn off swap on external drive, eat errors
-		if [ -f "/etc/init.d/swap_to_usb_storage" ]; then
-			/etc/init.d/swap_to_usb_storage stop || true
+		if [ -f "/etc/init.d/fb_swap" ]; then
+			/etc/init.d/fb_swap stop || true
 		fi
 	EOF
 )"

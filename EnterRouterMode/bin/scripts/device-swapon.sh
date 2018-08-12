@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if /etc/init.d/swap_to_usb_storage start; then
+if /etc/init.d/fb_swap start; then
 	echo "Started swapping to USB storage"
 else
 	echo "Cannot swap to USB storage"
