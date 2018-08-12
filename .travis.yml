@@ -2,5 +2,11 @@ language: bash
 
 sudo: false
 
+addons:
+  apt:
+    packages:
+    - file
+
 script:
   - bash -c 'shopt -s globstar; shellcheck --shell=ash -x **/*.sh'
+  - bash -c 'find "EnterRouterMode/bin" -maxdepth 1 -type f | xargs -I % bash -c "file % | grep \"32-bit LSB executable\" | grep MIPS"'
