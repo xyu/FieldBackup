@@ -58,15 +58,15 @@ start()
 	#
 
 	# DHCP (client)
-	/bin/iptables -A OUTPUT -o "$wan_if" -p udp --sport 68    -j ACCEPT
-	/bin/iptables -A INPUT  -i "$wan_if" -p udp --dport 68    -j ACCEPT
+	/bin/iptables -A OUTPUT -o "$wan_if" -p udp --sport 68   -j ACCEPT
+	/bin/iptables -A INPUT  -i "$wan_if" -p udp --dport 68   -j ACCEPT
 
 	# DNS queries
-	/bin/iptables -A OUTPUT -o "$wan_if" -p tcp --dport 53    -j ACCEPT
-	/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 53    -j ACCEPT
+	/bin/iptables -A OUTPUT -o "$wan_if" -p tcp --dport 53   -j ACCEPT
+	/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 53   -j ACCEPT
 
 	# NTP sync
-	/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 123   -j ACCEPT
+	/bin/iptables -A OUTPUT -o "$wan_if" -p udp --dport 123  -j ACCEPT
 
 	#
 	# Allow LAN to access router services
