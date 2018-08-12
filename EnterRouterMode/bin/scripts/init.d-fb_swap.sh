@@ -7,7 +7,6 @@
 
 # Log all output to logfile on USB disk or just echo to stdout
 if [ -d "$MNT_USB/EnterRouterMode" ]; then
-	touch "$SWAP_LOG"
 	exec 1>> "$SWAP_LOG" 2>&1
 fi
 
