@@ -95,6 +95,14 @@ start()
 	# DLNA
 	/bin/iptables -A INPUT  -i "$lan_if" -p tcp --dport 8200 -j ACCEPT
 
+	#
+	# Custom clients
+	#
+
+	# SSH
+	/bin/iptables -A OUTPUT -o "$wan_if" -p tcp --dport 22   -j ACCEPT
+	/bin/iptables -A OUTPUT -o "$lan_if" -p tcp --dport 22   -j ACCEPT
+
 	return 0
 }
 
