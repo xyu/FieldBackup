@@ -6,12 +6,16 @@ A set of scripts that will automatically backup SD cards inserted into the RAVPo
 
 ## Installation
 
-1. Copy the following files and dirs to the root of your USB backup drive:
+1. Update the configs file to customize the installation (optional):
+```
+EnterRouterMode/conf
+```
+2. Copy the following files and directories to the root of your USB backup drive:
 ```
 EnterRouterMode
 EnterRouterMode.sh
 ```
-2. Turn on your router then plug in the USB backup drive and wait for the lights to stop flashing.
+3. Turn on the RAVPower FileHub Plus then plug the USB backup drive in and wait for the lights to stop flashing.
 
 ## Backing up SD cards to USB drive
 
