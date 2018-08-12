@@ -3,5 +3,6 @@ language: bash
 sudo: false
 
 script:
+  - bash -c 'shopt -s globstar; shfmt -ln=posix **/*.sh > /dev/null'
   - bash -c 'shopt -s globstar; shellcheck --shell=ash -x **/*.sh'
   - bash -c 'find "EnterRouterMode/bin" -maxdepth 1 -type f | xargs -I % bash -c "file % | grep \"ELF 32-bit LSB\" | grep MIPS"'
