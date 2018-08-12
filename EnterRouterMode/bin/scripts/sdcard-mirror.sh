@@ -19,8 +19,8 @@ eject_sd_card()
 }
 
 # Load configs for mirroring from SD card
-# Ignore warning because it does not exist in this repo for shellcheck
-# shellcheck disable=SC1090
+# Use a mock for shellcheck
+# shellcheck source=dev/test/data/UsbDisk1/Volume1/FieldBackup.conf
 . "$CONFIGFILE"
 
 if [ "YES" = "$SD_REPLICA" ]; then
