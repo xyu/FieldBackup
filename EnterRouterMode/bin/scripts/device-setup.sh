@@ -29,16 +29,6 @@ add_mod()
 	rm "$1.modtemp"
 }
 
-make_exe()
-{
-	# Make sure dir exists and write file
-	mkdir -p "$( echo "$1" | sed "s|/$( basename "$1" )\$||g" )"
-	echo "$2" > "$1"
-
-	# Make file executable
-	chmod +x "$1"
-}
-
 install_init_script()
 {
 	local TARGET="/etc/init.d/$1"
