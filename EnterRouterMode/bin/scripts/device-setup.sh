@@ -97,7 +97,7 @@ update_etc_passwd()
 		)
 	done < "$1"
 
-	printf "$OUTPUT" | grep ":" > "$1"
+	printf '%s' "$OUTPUT" | grep ":" > "$1"
 }
 
 update_etc_shadow()
@@ -125,7 +125,7 @@ update_etc_shadow()
 		)
 	done < "$1"
 
-	printf "$OUTPUT" | grep ":" > "$1"
+	printf '%s' "$OUTPUT" | grep ":" > "$1"
 }
 
 ##
