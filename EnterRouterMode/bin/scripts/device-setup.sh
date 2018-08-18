@@ -43,6 +43,91 @@ install_init_script()
 	chmod 755 "$TARGET"
 }
 
+get_admin_pass_hash()
+{
+	local IFS USERNAME PASSWORD
+
+	# Find password hash of admin user
+	IFS=":"
+	while read -r USERNAME PASSWORD _ ; do
+		if [ "admin" = "$USERNAME" ]; then
+			echo "$PASSWORD"
+			return 0
+		fi
+	done < "$1"
+
+	# Did not find password hash
+	return 1
+}
+
+update_etc_passwd()
+{
+	local IFS OUTPUT ADMIN_PASS U_NAME U_PASS U_ID U_GID U_NICENAME U_HOME U_SHELL
+
+	OUTPUT=""
+	ADMIN_PASS="$( get_admin_pass_hash "$1" )"
+
+	# Process /etc/passwd file
+	IFS=":"
+	while read -r U_NAME U_PASS U_ID U_GID U_NICENAME U_HOME U_SHELL ; do
+		if [ "root" = "$U_NAME" ]; then
+			# Reset home dir because /root does not exist
+			U_HOME="/"
+
+			# Reset root password to that of 'admin'?
+			if [ "YES" = "$ROOT_PASS_RESET" ]; then
+				echo "root password reset to admin password on '$1'"
+				U_PASS="$ADMIN_PASS"
+			fi
+
+			# Allow logins as root?
+			if [ "YES" = "$ROOT_LOGIN" ]; then
+				echo "root login enabled on '$1'"
+				U_SHELL="/bin/sh"
+			else
+				echo "root login disabled on '$1'"
+				U_SHELL="/sbin/nologin"
+			fi
+		fi
+
+		OUTPUT=$(
+			printf '%s\n%s' \
+				"$OUTPUT" \
+				"$U_NAME:$U_PASS:$U_ID:$U_GID:$U_NICENAME:$U_HOME:$U_SHELL"
+		)
+	done < "$1"
+
+	printf "$OUTPUT" | grep ":" > "$1"
+}
+
+update_etc_shadow()
+{
+	local IFS OUTPUT ADMIN_PASS U_NAME U_PASS U_DATA
+
+	OUTPUT=""
+	ADMIN_PASS="$( get_admin_pass_hash "$1" )"
+
+	# Process file
+	IFS=":"
+	while read -r U_NAME U_PASS U_DATA ; do
+		if [ "root" = "$U_NAME" ]; then
+			# Reset root password to that of 'admin'?
+			if [ "YES" = "$ROOT_PASS_RESET" ]; then
+				echo "root password reset to admin password on '$1'"
+				U_PASS="$ADMIN_PASS"
+			fi
+		fi
+
+		OUTPUT=$(
+			printf '%s\n%s' \
+				"$OUTPUT" \
+				"$U_NAME:$U_PASS:$U_DATA"
+		)
+	done < "$1"
+
+	printf "$OUTPUT" | grep ":" > "$1"
+}
+
 ##
 # Setup device on config change
 ##
@@ -70,24 +155,9 @@ md5sum \
 # Payload
 ##
 
-# Reset root password to that of 'admin'?
-if [ "YES" = "$ROOT_PASS_RESET" ]; then
-	echo "Resetting root password to admin password"
-	HASH=$( grep -Eo "admin:[^:]+" /etc/passwd | sed 's/admin:\([^:]*\)/\1/' )
-	sed -i "s|root:[^:]*|root:$HASH|" /etc/passwd
-
-	HASH=$( grep -Eo "admin:[^:]+" /etc/shadow | sed 's/admin:\([^:]*\)/\1/' )
-	sed -i "s|root:[^:]*|root:$HASH|" /etc/shadow
-fi
-
-# Allow logins as root?
-if [ "YES" = "$ROOT_LOGIN" ]; then
-	echo "Enabling root login"
-	sed -i "s|:/root:/sbin/nologin|:/root:/bin/sh|" /etc/passwd
-else
-	echo "Disabling root login"
-	sed -i "s|:/root:/bin/sh|:/root:/sbin/nologin|" /etc/passwd
-fi
+# Update password files
+update_etc_passwd "/etc/passwd"
+update_etc_shadow "/etc/shadow"
 
 # Turn on telnet access?
 if [ "YES" = "$TELNET" ]; then
