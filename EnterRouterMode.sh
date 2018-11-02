@@ -38,16 +38,29 @@ led_wink()
 		"ON")
 			if [ "FALSE" = "$WINKING" ]; then
 				WINKING="TRUE"
-				/usr/sbin/pioctl status 2 || true
+				pioctl_status "2"
 			fi
 			;;
 		"OFF")
 			if [ "TRUE" = "$WINKING" ]; then
 				WINKING="FALSE"
-				/usr/sbin/pioctl status 3 || true
+				pioctl_status "3"
 			fi
 			;;
 	esac
+}
+
+pioctl_status()
+{
+		local COUNT="0"
+		while [ "$COUNT" -lt "3" ]; do
+			sleep "$COUNT"
+			COUNT=$(( COUNT + 1 ))
+
+			# Retry with backoffs and eat errors
+			# shellcheck disable=SC2015
+			/usr/sbin/pioctl "status" "$1" && break || true
+		done
 }
 
 sd_is_readonly()
