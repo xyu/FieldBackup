@@ -222,4 +222,6 @@ if [ -f "$CONFIGFILE" ]; then
 	run bin/scripts/device-swapon.sh
 	run bin/scripts/sdcard-mirror.sh
 	run bin/scripts/device-swapoff.sh
+else
+	echo "No SD card or config, exiting."
 fi
